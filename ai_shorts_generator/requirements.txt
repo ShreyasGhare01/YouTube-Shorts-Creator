@@ -1,0 +1,10 @@
+yt-dlp
+moviepy
+faster-whisper
+pydub
+numpy
+transformers
+opencv-python
+static-ffmpeg
+pyyaml
+torch
