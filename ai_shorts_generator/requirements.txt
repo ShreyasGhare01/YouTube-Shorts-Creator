@@ -8,3 +8,9 @@ opencv-python
 static-ffmpeg
 pyyaml
 torch
+mediapipe
+librosa
+sentence-transformers
+scikit-learn
+matplotlib
+Pillow

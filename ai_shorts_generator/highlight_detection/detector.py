@@ -1,61 +1,62 @@
 import numpy as np
-from pydub import AudioSegment
 import re
+from .sentiment import SentimentAnalyzer
+from .motion import MotionDetector
+from .audio_analysis import AudioAnalyzer
 
 class HighlightDetector:
     def __init__(self):
         self.keywords = ["crazy", "watch this", "unbelievable", "look at this", "amazing", "insane", "incredible", "wow"]
+        self.sentiment_analyzer = SentimentAnalyzer()
+        self.motion_detector = MotionDetector()
+        self.audio_analyzer = AudioAnalyzer()
 
-    def analyze_audio_energy(self, audio_path, chunk_ms=1000):
-        audio = AudioSegment.from_file(audio_path)
-        energies = []
-        for i in range(0, len(audio), chunk_ms):
-            chunk = audio[i:i+chunk_ms]
-            energies.append(chunk.rms)
-        return np.array(energies)
+    def score_transcript_keywords(self, text):
+        text = text.lower()
+        score = 0
+        for kw in self.keywords:
+            if kw in text:
+                score += 1.0
+        if '!' in text:
+            score += 0.5
+        return min(1.0, score / 2.0)
 
-    def score_transcript(self, transcript):
+    def get_highlight_scores(self, transcript, audio_path, video_path):
+        audio_data = self.audio_analyzer.analyze_audio(audio_path)
+        motion_data = self.motion_detector.analyze_motion(video_path)
+        return self.get_highlight_scores_with_data(transcript, audio_data, motion_data)
+
+    def get_highlight_scores_with_data(self, transcript, audio_data, motion_data):
         scores = []
         for segment in transcript:
-            text = segment['text'].lower()
-            score = 0
-            for kw in self.keywords:
-                if kw in text:
-                    score += 10
+            start = segment['start']
+            end = segment['end']
 
-            # Simple excitement detection based on punctuation
-            if '!' in segment['text']:
-                score += 5
+            seg_audio = [v for t, v in audio_data if start <= t <= end]
+            audio_intensity = np.mean(seg_audio) if seg_audio else 0
 
-            # Emotion/Sentiment would go here, but for now we use keywords
-            scores.append(score)
-        return np.array(scores)
+            sentiment_score = self.sentiment_analyzer.get_emotional_intensity(segment['text'])
+            speech_emotion = sentiment_score
 
-    def get_highlight_scores(self, transcript, audio_energies):
-        # Normalize energies
-        if len(audio_energies) > 0:
-            max_energy = np.max(audio_energies) if np.max(audio_energies) > 0 else 1
-            norm_energies = audio_energies / max_energy
-        else:
-            norm_energies = np.array([])
+            seg_motion = [v for t, v in motion_data if start <= t <= end]
+            visual_motion = np.mean(seg_motion) if seg_motion else 0
 
-        scores = []
-        for i, segment in enumerate(transcript):
-            start_idx = int(segment['start'])
-            end_idx = int(segment['end'])
+            keyword_score = self.score_transcript_keywords(segment['text'])
 
-            # Average energy during this segment
-            seg_energy = np.mean(norm_energies[start_idx:end_idx+1]) if end_idx < len(norm_energies) else 0
+            scene_change_score = visual_motion / 10.0
 
-            t_score = self.score_transcript([segment])[0]
-
-            # Combined score
-            combined_score = 0.4 * t_score + 0.6 * seg_energy * 20
+            viral_score = (
+                0.30 * speech_emotion +
+                0.20 * keyword_score +
+                0.20 * (visual_motion / 5.0) +
+                0.15 * (audio_intensity * 10) +
+                0.15 * min(1.0, scene_change_score)
+            )
 
             scores.append({
-                "start": segment['start'],
-                "end": segment['end'],
-                "score": combined_score,
+                "start": start,
+                "end": end,
+                "score": viral_score,
                 "text": segment['text']
             })
 

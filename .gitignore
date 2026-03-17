@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+temp/
+ai_shorts_generator/export/*.mp4
+ai_shorts_generator/export/*.jpg
+ai_shorts_generator/export/*.json
+.env
+.vscode/
