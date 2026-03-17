@@ -1,5 +1,5 @@
 yt-dlp
-moviepy
+moviepy>=2.0.0
 faster-whisper
 pydub
 numpy
@@ -14,3 +14,6 @@ sentence-transformers
 scikit-learn
 matplotlib
 Pillow
+fastapi
+uvicorn
+python-multipart
