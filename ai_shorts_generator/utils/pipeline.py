@@ -1,6 +1,7 @@
 import os
 import shutil
 import concurrent.futures
+from moviepy import VideoFileClip
 from ai_shorts_generator.download.downloader import Downloader
 from ai_shorts_generator.transcription.transcriber import Transcriber
 from ai_shorts_generator.highlight_detection.detector import HighlightDetector
@@ -27,15 +28,10 @@ class ShortsPipeline:
             self.progress_callback(step, percentage, message)
         print(f"[{percentage}%] {step}: {message}")
 
-    def generate(self, url, short_count=3, max_duration=60, export_path='ai_shorts_generator/export'):
-        exporter = Exporter(export_dir=export_path)
-        selector = ClipSelector(max_duration=max_duration)
-
-        # 1. Download
+    def analyze_signals(self, url):
         self._update_progress("Downloading", 10, f"Downloading video from {url}...")
         video_path, audio_path, video_info = self.downloader.download(url)
 
-        # 2. Transcription and Signal Analysis (Parallel)
         self._update_progress("Analyzing", 30, "Transcribing and Analyzing Signals...")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             transcription_future = executor.submit(self.transcriber.transcribe, audio_path)
@@ -50,30 +46,92 @@ class ShortsPipeline:
             os.makedirs("temp")
         self.transcriber.save_transcript(transcript, "temp/transcript.json")
 
-        # 3. Detect Highlights
-        self._update_progress("Highlight Detection", 50, "Detecting viral highlights...")
-        highlight_scores = self.detector.get_highlight_scores_with_data(transcript, audio_data, motion_data)
+        return {
+            "video_path": video_path,
+            "audio_path": audio_path,
+            "video_info": video_info,
+            "transcript": transcript,
+            "audio_data": audio_data,
+            "motion_data": motion_data
+        }
 
-        # 4. Select Clips
-        self._update_progress("Clip Selection", 60, "Selecting best clips...")
-        selected_clips = selector.select_clips(highlight_scores, count=short_count)
+    def generate_previews(self, url):
+        signals = self.analyze_signals(url)
 
-        # 5. Edit and Export
-        self._update_progress("Editing", 70, f"Processing {len(selected_clips)} clips...")
+        self._update_progress("Highlight Detection", 50, "Detecting top viral moments...")
+        highlight_scores = self.detector.get_highlight_scores_with_data(
+            signals['transcript'], signals['audio_data'], signals['motion_data']
+        )
+
+        selector = ClipSelector(max_duration=60)
+        # Select up to 20 moments for preview
+        top_moments = selector.select_clips(highlight_scores, count=20)
+
+        self._update_progress("Preview Generation", 70, "Generating low-res preview clips...")
+        preview_clips = []
+
+        preview_dir = 'temp/previews'
+        if not os.path.exists(preview_dir):
+            os.makedirs(preview_dir)
+
+        def extract_preview(clip_info, idx):
+            start, end = clip_info['start'], clip_info['end']
+            output_path = f"{preview_dir}/preview_{idx}.mp4"
+
+            # Use MoviePy for fast extraction (no heavy effects, 480p)
+            with VideoFileClip(signals['video_path']).subclipped(start, end) as video:
+                # Resize to 480p height for speed
+                video_small = video.resized(height=480)
+                video_small.write_videofile(output_path, codec='libx264', audio_codec='aac', fps=24, logger=None, bitrate="500k")
+
+            return {
+                "id": idx,
+                "start": start,
+                "end": end,
+                "score": round(clip_info['score'], 2),
+                "transcript": clip_info['text'],
+                "file_path": f"/previews/preview_{idx}.mp4" # Relative URL for frontend
+            }
+
+        # Run preview extraction in parallel for speed
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(extract_preview, m, i) for i, m in enumerate(top_moments)]
+            preview_clips = [f.result() for f in futures]
+
+        self._update_progress("Complete", 100, "Preview generation finished!")
+        return preview_clips, signals
+
+    def generate(self, url, short_count=3, max_duration=60, export_path='ai_shorts_generator/export', selected_clips=None):
+        exporter = Exporter(export_dir=export_path)
+
+        # If signals were already processed (cached or passed), use them.
+        # For MVP we'll re-analyze or assume background persistence.
+        signals = self.analyze_signals(url)
+
+        if selected_clips:
+            clips_to_process = selected_clips
+        else:
+            highlight_scores = self.detector.get_highlight_scores_with_data(
+                signals['transcript'], signals['audio_data'], signals['motion_data']
+            )
+            selector = ClipSelector(max_duration=max_duration)
+            clips_to_process = selector.select_clips(highlight_scores, count=short_count)
+
+        self._update_progress("Editing", 70, f"Processing {len(clips_to_process)} clips...")
         exported_files = []
-        for i, clip_info in enumerate(selected_clips):
-            step_percentage = 70 + int((i / len(selected_clips)) * 25)
-            self._update_progress("Editing", step_percentage, f"Processing Short {i+1}/{len(selected_clips)}")
+        for i, clip_info in enumerate(clips_to_process):
+            step_percentage = 70 + int((i / len(clips_to_process)) * 25)
+            self._update_progress("Editing", step_percentage, f"Processing Short {i+1}/{len(clips_to_process)}")
 
             hook_text = self.hook_gen.generate_hook(clip_info['text'])
-            base_clip = self.editor.process_clip(video_path, clip_info['start'], clip_info['end'], f"short_{i+1}_raw.mp4")
-            final_clip = self.captioner.add_captions(base_clip, transcript, clip_info['start'], hook_text=hook_text)
+            base_clip = self.editor.process_clip(signals['video_path'], clip_info['start'], clip_info['end'], f"short_{i+1}_raw.mp4")
+            final_clip = self.captioner.add_captions(base_clip, signals['transcript'], clip_info['start'], hook_text=hook_text)
 
             video_filename = f"short_{i+1}.mp4"
             exported_video = exporter.export_video(final_clip, video_filename)
             exporter.export_thumbnail(final_clip, f"thumbnail_{i+1}.jpg")
 
-            metadata = self.metadata_gen.generate(clip_info['text'], video_info)
+            metadata = self.metadata_gen.generate(clip_info['text'], signals['video_info'])
             self.metadata_gen.save_metadata(metadata, os.path.join(exporter.export_dir, f"metadata_{i+1}.json"))
             exported_files.append(exported_video)
 
