@@ -89,7 +89,7 @@ class ShortsPipeline:
                 "start": start,
                 "end": end,
                 "score": round(clip_info['score'], 2),
-                "transcript": clip_info['text'],
+                "text": clip_info['text'],
                 "file_path": f"/previews/preview_{idx}.mp4" # Relative URL for frontend
             }
 
