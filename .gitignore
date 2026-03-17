@@ -6,3 +6,5 @@ ai_shorts_generator/export/*.jpg
 ai_shorts_generator/export/*.json
 .env
 .vscode/
+node_modules/
+dist/
