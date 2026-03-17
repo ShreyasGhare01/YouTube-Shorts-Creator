@@ -1,6 +1,6 @@
-# AI YouTube Shorts Generator
+# AI YouTube Shorts Generator (Windows Version)
 
-An automated AI-powered pipeline that converts long-form YouTube videos into high-quality, engaging vertical Shorts ready for upload.
+An automated AI-powered pipeline that converts long-form YouTube videos into high-quality, engaging vertical Shorts ready for upload, optimized for Windows.
 
 ## 🚀 What This Program Does
 
@@ -8,92 +8,78 @@ The AI YouTube Shorts Generator uses state-of-the-art AI models to analyze video
 
 ### Key Features
 
-*   **Viral Moment Scoring:** Automatically identifies the best clips using a multi-signal model that analyzes:
-    *   **Audio Intensity:** Detects excitement, volume spikes, and emotional emphasis.
-    *   **Sentiment Analysis:** Scans the transcript for controversial, surprising, or high-emotion language.
-    *   **Visual Motion:** Finds high-action scenes and dynamic visual changes.
-    *   **Keyword Detection:** Prioritizes viral triggers like "crazy," "unbelievable," or "watch this."
-*   **AI Hook Generator:** Uses an LLM to generate a curiosity-driven "Hook" sentence that appears in the first 2.5 seconds to maximize viewer retention.
-*   **Smart Face-Tracking Crop:** Uses computer vision to detect faces and objects, smoothly tracking the main subject while converting horizontal video to vertical (9:16).
-*   **Dynamic Captions:** Automatically generates word-by-word burned-in captions with viral-style styling.
-*   **Clip Preview Mode:** A human-in-the-loop dashboard where you can watch the top 20 detected moments and choose exactly which ones to render as final Shorts.
-*   **Parallel Processing:** Optimized backend that transcribes and analyzes audio/visual signals concurrently for maximum speed.
+*   **Viral Moment Scoring:** Automatically identifies the best clips using a multi-signal model that analyzes audio intensity, sentiment, visual motion, and keywords.
+*   **AI Hook Generator:** Uses an LLM to generate a curiosity-driven "Hook" sentence for the opening seconds.
+*   **Smart Face-Tracking Crop:** Automatically detects and tracks faces to create perfect vertical crops from horizontal videos.
+*   **Clip Preview Mode:** Interactive dashboard to review and approve clips before final rendering.
 
 ---
 
-## 🛠 Setup Instructions
+## 🛠 Setup Instructions for Windows
 
 ### 1. Prerequisites
-Make sure you have the following installed on your computer:
-*   **Python 3.8 or higher**
-*   **Node.js & npm** (for the web dashboard)
+Make sure you have the following installed on your Windows machine:
+*   **Python 3.10+**: [Download from Python.org](https://www.python.org/downloads/windows/) (Ensure "Add Python to PATH" is checked during installation)
+*   **Node.js & npm**: [Download from Nodejs.org](https://nodejs.org/)
 
-### 2. Install Dependencies
-Open your terminal in the project root directory and run:
-```bash
-pip install -r ai_shorts_generator/requirements.txt
+### 2. Install Python Dependencies
+Open **Command Prompt** (cmd) or **PowerShell** in the project folder and run:
+```cmd
+pip install -r ai_shorts_generator\requirements.txt
 ```
 
-### 3. Frontend Setup
-Navigate to the frontend directory and install the necessary packages:
-```bash
-cd ai_shorts_generator/dashboard/frontend
+### 3. Setup Frontend Dashboard
+In the same terminal, run:
+```cmd
+cd ai_shorts_generator\dashboard\frontend
 npm install
-cd ../../../
+cd ..\..\..\
 ```
 
 ---
 
-## 💻 How to Use (Step-by-Step)
+## 💻 How to Use on Windows (Step-by-Step)
 
 ### Option A: Using the Web Dashboard (Recommended)
 
-This is the easiest way to use the program, allowing you to preview and select clips before they are generated.
-
 1.  **Start the Backend Server:**
-    Open a terminal and run:
-    ```bash
-    PYTHONPATH=. uvicorn ai_shorts_generator.dashboard.backend.main:app --port 8000
+    Open a terminal in the root folder and run:
+    ```cmd
+    set PYTHONPATH=.
+    uvicorn ai_shorts_generator.dashboard.backend.main:app --port 8000
     ```
 2.  **Start the Frontend Dashboard:**
-    Open a *second* terminal, navigate to the frontend folder, and run:
-    ```bash
-    cd ai_shorts_generator/dashboard/frontend
+    Open a **NEW** terminal window, navigate to the frontend folder, and run:
+    ```cmd
+    cd ai_shorts_generator\dashboard\frontend
     npm run dev
     ```
 3.  **Open the Dashboard:**
-    Visit `http://localhost:3000` in your web browser.
+    Open your browser and go to: `http://localhost:3000`
 4.  **Process a Video:**
-    *   **Paste a YouTube Link** into the input box and click "Get Info".
-    *   **Verify the Title** and click "Confirm".
-    *   Click **"Generate Clip Previews"**. The AI will now analyze the video and create low-resolution previews of the top moments.
-    *   **Review Clips:** Scroll through the grid, watch the previews, and click "Approve" or "Reject".
-    *   **Select Shorts Count:** Choose how many final Shorts you want (e.g., 3).
-    *   **Set Export Folder:** Type the folder path where you want the final videos saved.
-    *   **Click "Start Final Generation":** The AI will now render high-quality vertical videos with hooks, smart cropping, and captions.
+    *   Paste your YouTube link and click **"Get Info"**.
+    *   Click **"Confirm"** once the title is detected.
+    *   Click **"Generate Clip Previews"** to see the AI-detected highlights.
+    *   Review, Approve/Reject clips in the grid.
+    *   Enter an **Export Path** (e.g., `C:\Shorts\MyChannel`) and click **"Start Final Generation"**.
 
 ### Option B: Using the Command Line (CLI)
 
-For power users who want to generate shorts automatically without a preview.
-
-1.  Open your terminal in the root directory.
+1.  Open a terminal in the project root folder.
 2.  Run the following command:
-    ```bash
-    PYTHONPATH=. python ai_shorts_generator/main.py --url https://youtube.com/watch?v=EXAMPLE --count 3
+    ```cmd
+    set PYTHONPATH=.
+    python ai_shorts_generator\main.py --url https://youtube.com/watch?v=EXAMPLE --count 3
     ```
-3.  The generated shorts, thumbnails, and metadata will be available in the `ai_shorts_generator/export/` directory.
+3.  Your finished Shorts will be saved in `ai_shorts_generator\export\`.
 
 ---
 
 ## 📂 Project Structure
 
-*   `ai_shorts_generator/`
-    *   `download/`: Video/Audio retrieval logic.
-    *   `transcription/`: Whisper AI speech-to-text.
-    *   `highlight_detection/`: Viral scoring AI models.
-    *   `hook_generator/`: LLM-based hook generation.
-    *   `video_editing/`: Smart cropping and MoviePy logic.
-    *   `captioning/`: Dynamic text overlay engine.
-    *   `export/`: Final generated output.
-    *   `dashboard/`: FastAPI backend and React frontend.
-    *   `utils/`: Core pipeline orchestration.
+*   `ai_shorts_generator\`
+    *   `dashboard\`: Web interface (FastAPI + React).
+    *   `highlight_detection\`: AI scoring logic.
+    *   `video_editing\`: Smart cropping and rendering.
+    *   `hook_generator\`: LLM hook creation.
+    *   `export\`: Default output folder.
