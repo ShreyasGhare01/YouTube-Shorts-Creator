@@ -5,20 +5,21 @@ class CaptionGenerator:
     def __init__(self):
         self.font = None
 
-    def add_captions(self, video_clip, transcript, start_offset, hook_text=None):
+    def add_captions(self, video_clip, transcript, start_offset, hook_text=None, style="viral"):
         clips_to_composite = [video_clip]
 
         clip_start = start_offset
         clip_end = start_offset + video_clip.duration
 
+        # Add Hook if provided (0.0 -> 2.5 seconds)
         if hook_text:
             try:
                 hook_clip = TextClip(
                     text=hook_text,
-                    font_size=100,
-                    color='yellow',
+                    font_size=100 if style == "viral" else 70,
+                    color='yellow' if style == "viral" else 'white',
                     stroke_color='black',
-                    stroke_width=4,
+                    stroke_width=4 if style == "viral" else 2,
                     method='label',
                     duration=2.5
                 ).with_start(0).with_position(('center', 'center'))
@@ -26,6 +27,7 @@ class CaptionGenerator:
             except Exception as e:
                 print(f"Error creating Hook TextClip: {e}")
 
+        # Regular captions
         for segment in transcript:
             for word_info in segment.get('words', []):
                 word_start = word_info['start']
@@ -37,15 +39,21 @@ class CaptionGenerator:
                         continue
 
                     try:
+                        # Styling based on choice
+                        font_size = 70 if style == "viral" else 40
+                        color = 'white'
+                        if style == "viral" and any(k in word_info['word'].lower() for k in ["crazy", "wow", "insane", "unbelievable"]):
+                            color = 'yellow'
+
                         txt_clip = TextClip(
-                            text=word_info['word'].upper(),
-                            font_size=70,
-                            color='white',
-                            stroke_color='black',
-                            stroke_width=2,
+                            text=word_info['word'].upper() if style != "clean" else word_info['word'],
+                            font_size=font_size,
+                            color=color,
+                            stroke_color='black' if style != "clean" else None,
+                            stroke_width=2 if style != "clean" else 0,
                             method='label',
                             duration=word_end - word_start
-                        ).with_start(start_relative).with_position(('center', 1400))
+                        ).with_start(start_relative).with_position(('center', 1400 if style != "clean" else 1700))
 
                         clips_to_composite.append(txt_clip)
                     except Exception as e:

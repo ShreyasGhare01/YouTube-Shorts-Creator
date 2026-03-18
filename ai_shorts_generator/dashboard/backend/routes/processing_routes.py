@@ -12,9 +12,15 @@ class ProcessingRequest(BaseModel):
     short_count: int
     export_path: str
     selected_clips: Optional[List[dict]] = None
+    mood: Optional[str] = "serious"
+    music_style: Optional[str] = "auto"
+    ending_style: Optional[str] = "hard_cut"
+    caption_style: Optional[str] = "viral"
+    editing_intensity: Optional[int] = 3
 
 class PreviewRequest(BaseModel):
     url: str
+    preferred_duration: Optional[int] = 30
 
 active_connections = {}
 
@@ -45,12 +51,9 @@ def get_progress_callback(task_id):
 
 @router.post("/generate_previews")
 async def generate_previews(request: PreviewRequest):
-    # For MVP, we'll run this synchronously or in a separate thread but wait for result
-    # as the frontend expects the list of clips immediately after.
-    # In a real app, this would be a background task + websocket notification.
     task_id = request.url
     pipeline = ShortsPipeline(progress_callback=get_progress_callback(task_id))
-    clips, signals = await asyncio.to_thread(pipeline.generate_previews, request.url)
+    clips, signals = await asyncio.to_thread(pipeline.generate_previews, request.url, request.preferred_duration)
     return {"clips": clips}
 
 @router.post("/generate_shorts")
@@ -63,7 +66,12 @@ async def generate_shorts(request: ProcessingRequest, background_tasks: Backgrou
             url=request.url,
             short_count=request.short_count,
             export_path=request.export_path,
-            selected_clips=request.selected_clips
+            selected_clips=request.selected_clips,
+            mood=request.mood,
+            music_style=request.music_style,
+            ending_style=request.ending_style,
+            caption_style=request.caption_style,
+            editing_intensity=request.editing_intensity
         )
 
     background_tasks.add_task(run_pipeline)

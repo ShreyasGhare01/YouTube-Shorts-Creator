@@ -3,7 +3,16 @@ class ClipSelector:
         self.min_duration = min_duration
         self.max_duration = max_duration
 
-    def select_clips(self, highlight_scores, count=3):
+    def select_clips(self, highlight_scores, count=3, preferred_duration=None):
+        # Bias scores based on preferred duration if provided
+        if preferred_duration:
+            for segment in highlight_scores:
+                duration = segment['end'] - segment['start']
+                # Calculate a multiplier (1.0 at preferred, decreasing as it deviates)
+                diff = abs(duration - preferred_duration)
+                multiplier = max(0.5, 1.0 - (diff / 60.0))
+                segment['score'] *= multiplier
+
         # Sort by score descending
         sorted_segments = sorted(highlight_scores, key=lambda x: x['score'], reverse=True)
 

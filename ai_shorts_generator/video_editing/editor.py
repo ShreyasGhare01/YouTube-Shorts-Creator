@@ -1,5 +1,5 @@
 from moviepy import VideoFileClip, ColorClip, CompositeVideoClip, TextClip
-from moviepy.video.fx import Resize, Crop
+from moviepy.video.fx import Resize, Crop, CrossFadeOut
 import os
 import numpy as np
 from .smart_cropper import SmartCropper
@@ -11,7 +11,7 @@ class VideoEditor:
             os.makedirs(self.output_dir)
         self.smart_cropper = SmartCropper()
 
-    def process_clip(self, video_path, start_time, end_time, output_name):
+    def process_clip(self, video_path, start_time, end_time, output_name, mood="serious", intensity=3, ending_style="hard_cut"):
         video = VideoFileClip(video_path).subclipped(start_time, end_time)
 
         target_ratio = 9/16
@@ -19,26 +19,40 @@ class VideoEditor:
 
         smoothed_centers = self.smart_cropper.process_video_crops(video)
 
-        def crop_frame(get_frame, t):
+        def transform_frame(get_frame, t):
             frame = get_frame(t)
             cx, cy = self.smart_cropper.get_smoothed_center_at_time(t, smoothed_centers, video.duration)
 
+            # Apply dynamic zoom based on intensity and mood
+            zoom_factor = 1.0
+            if intensity >= 4 or mood in ["high_energy", "funny"]:
+                # Periodic zoom effect
+                zoom_factor = 1.0 + 0.1 * np.sin(t * np.pi)
+
             if w/h > target_ratio:
-                crop_w = h * target_ratio
-                crop_h = h
+                crop_w = (h * target_ratio) / zoom_factor
+                crop_h = h / zoom_factor
             else:
-                crop_w = w
-                crop_h = w / target_ratio
+                crop_w = w / zoom_factor
+                crop_h = (w / target_ratio) / zoom_factor
 
             x1 = max(0, min(w - crop_w, cx - crop_w / 2))
             y1 = max(0, min(h - crop_h, cy - crop_h / 2))
             x2 = x1 + crop_w
             y2 = y1 + crop_h
 
-            return frame[int(y1):int(y2), int(x1):int(x2)]
+            cropped = frame[int(y1):int(y2), int(x1):int(x2)]
+            return cropped
 
-        video = video.transform(crop_frame)
+        video = video.transform(transform_frame)
         video = video.resized(height=1920) if video.h != 1920 else video
+
+        # Apply Ending Style
+        if ending_style == "fade_out":
+            video = video.with_effects([CrossFadeOut(1.5)])
+        elif ending_style == "zoom_fade":
+            # Simplified zoom fade logic
+            video = video.with_effects([CrossFadeOut(1.0)])
 
         return video
 

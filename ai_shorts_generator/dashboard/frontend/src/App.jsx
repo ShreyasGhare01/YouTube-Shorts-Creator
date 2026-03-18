@@ -5,6 +5,7 @@ import VideoVerification from './components/VideoVerification';
 import GenerationOptions from './components/GenerationOptions';
 import ProgressDisplay from './components/ProgressDisplay';
 import ClipGrid from './components/ClipGrid';
+import CreativeControls from './components/CreativeControls';
 import { Play, Eye, Sparkles, AlertCircle } from 'lucide-react';
 
 const App = () => {
@@ -21,6 +22,22 @@ const App = () => {
 
   const [clips, setClips] = useState([]);
   const [approvedClipIds, setApprovedClipIds] = useState([]);
+
+  const [creativeSettings, setCreativeSettings] = useState(() => {
+    const saved = localStorage.getItem('creativeSettings');
+    return saved ? JSON.parse(saved) : {
+      mood: 'serious',
+      music_style: 'auto',
+      ending_style: 'hard_cut',
+      caption_style: 'viral',
+      clip_length_preference: 30,
+      editing_intensity: 3
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('creativeSettings', JSON.stringify(creativeSettings));
+  }, [creativeSettings]);
 
   const fetchVideoInfo = async () => {
     if (!url) return;
@@ -43,7 +60,10 @@ const App = () => {
     setupWebSocket();
 
     try {
-      const response = await axios.post('/api/generate_previews', { url });
+      const response = await axios.post('/api/generate_previews', {
+        url,
+        preferred_duration: creativeSettings.clip_length_preference
+      });
       setClips(response.data.clips);
       setApprovedClipIds(response.data.clips.map(c => c.id));
     } catch (err) {
@@ -84,6 +104,13 @@ const App = () => {
     }
   };
 
+  const applyPreset = (preset) => {
+    setCreativeSettings(prev => ({
+      ...prev,
+      ...preset
+    }));
+  };
+
   const startGeneration = async () => {
     if (!exportPath) {
       setError('Please select an export folder.');
@@ -99,7 +126,8 @@ const App = () => {
         url,
         short_count: shortCount,
         export_path: exportPath,
-        selected_clips: selectedClipsData.slice(0, shortCount)
+        selected_clips: selectedClipsData.slice(0, shortCount),
+        ...creativeSettings
       });
     } catch (err) {
       setError('Generation failed to start.');
@@ -148,18 +176,6 @@ const App = () => {
               disabled={isConfirmed}
             />
 
-            {isConfirmed && (
-              <div className="animate-in fade-in zoom-in-95 duration-500">
-                <GenerationOptions
-                  shortCount={shortCount}
-                  setShortCount={setShortCount}
-                  exportPath={exportPath}
-                  setExportPath={setExportPath}
-                  disabled={isGeneratingPreviews || isFinalGenerating}
-                />
-              </div>
-            )}
-
             {!isConfirmed && (
               <VideoVerification
                 videoInfo={videoInfo}
@@ -190,7 +206,7 @@ const App = () => {
           )}
 
           {clips.length > 0 && (
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
               <ClipGrid
                 clips={clips}
                 approvedClipIds={approvedClipIds}
@@ -200,16 +216,32 @@ const App = () => {
                 targetShortCount={shortCount}
               />
 
-              <div className="flex justify-center sticky bottom-10 z-50 px-4">
-                <button
-                  onClick={startGeneration}
-                  disabled={approvedClipIds.length === 0 || !exportPath || isFinalGenerating}
-                  className="group relative w-full md:w-3/4 flex justify-center py-8 px-10 border border-transparent text-3xl font-black rounded-3xl text-white bg-green-600 hover:bg-green-700 shadow-2xl transition-all transform hover:-translate-y-2 active:translate-y-0 disabled:bg-slate-300 disabled:transform-none disabled:shadow-none overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <Play className="mr-4" size={40} fill="currentColor" />
-                  {isFinalGenerating ? 'Rendering Shorts...' : 'Start Final Generation'}
-                </button>
+              <CreativeControls
+                settings={creativeSettings}
+                setSettings={setCreativeSettings}
+                onApplyPreset={applyPreset}
+              />
+
+              <div className="space-y-10">
+                <GenerationOptions
+                  shortCount={shortCount}
+                  setShortCount={setShortCount}
+                  exportPath={exportPath}
+                  setExportPath={setExportPath}
+                  disabled={isFinalGenerating}
+                />
+
+                <div className="flex justify-center sticky bottom-10 z-50 px-4">
+                  <button
+                    onClick={startGeneration}
+                    disabled={approvedClipIds.length === 0 || !exportPath || isFinalGenerating}
+                    className="group relative w-full md:w-3/4 flex justify-center py-8 px-10 border border-transparent text-3xl font-black rounded-3xl text-white bg-green-600 hover:bg-green-700 shadow-2xl transition-all transform hover:-translate-y-2 active:translate-y-0 disabled:bg-slate-300 disabled:transform-none disabled:shadow-none overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Play className="mr-4" size={40} fill="currentColor" />
+                    {isFinalGenerating ? 'Rendering Shorts...' : 'Start Final Generation'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
