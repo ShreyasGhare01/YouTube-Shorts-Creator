@@ -21,6 +21,10 @@ app.mount("/previews", StaticFiles(directory="temp/previews"), name="previews")
 app.include_router(video_routes.router)
 app.include_router(processing_routes.router)
 
-@app.get("/")
-async def root():
-    return {"message": "AI Shorts Generator API is running"}
+# Serve frontend at the end to avoid intercepting API routes
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+@app.get("/api/health")
+async def health():
+    return {"status": "ok"}

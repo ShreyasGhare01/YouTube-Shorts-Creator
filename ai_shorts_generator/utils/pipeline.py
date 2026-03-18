@@ -11,6 +11,7 @@ from ai_shorts_generator.captioning.caption_generator import CaptionGenerator
 from ai_shorts_generator.export.metadata_gen import MetadataGenerator
 from ai_shorts_generator.export.exporter import Exporter
 from ai_shorts_generator.hook_generator.hook_gen import HookGenerator
+from ai_shorts_generator.utils.cache import SignalCache
 
 class ShortsPipeline:
     def __init__(self, progress_callback=None):
@@ -22,6 +23,7 @@ class ShortsPipeline:
         self.captioner = CaptionGenerator()
         self.metadata_gen = MetadataGenerator()
         self.hook_gen = HookGenerator()
+        self.cache = SignalCache()
 
     def _update_progress(self, step, percentage, message):
         if self.progress_callback:
@@ -29,6 +31,11 @@ class ShortsPipeline:
         print(f"[{percentage}%] {step}: {message}")
 
     def analyze_signals(self, url):
+        cached_signals = self.cache.get(url)
+        if cached_signals:
+            self._update_progress("Analyzing", 30, "Using cached analysis...")
+            return cached_signals
+
         self._update_progress("Downloading", 10, f"Downloading video from {url}...")
         video_path, audio_path, video_info = self.downloader.download(url)
 
@@ -46,7 +53,7 @@ class ShortsPipeline:
             os.makedirs("temp")
         self.transcriber.save_transcript(transcript, "temp/transcript.json")
 
-        return {
+        signals = {
             "video_path": video_path,
             "audio_path": audio_path,
             "video_info": video_info,
@@ -54,6 +61,8 @@ class ShortsPipeline:
             "audio_data": audio_data,
             "motion_data": motion_data
         }
+        self.cache.set(url, signals)
+        return signals
 
     def generate_previews(self, url, preferred_duration=None):
         signals = self.analyze_signals(url)

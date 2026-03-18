@@ -57,4 +57,19 @@ class VideoEditor:
         return video
 
     def add_background_music(self, video_clip, music_path, volume=0.1):
-        pass
+        from moviepy import AudioFileClip, CompositeAudioClip
+
+        if not os.path.exists(music_path):
+            return video_clip
+
+        bg_music = AudioFileClip(music_path).with_volume_scaled(volume)
+
+        # Loop music if shorter than video
+        if bg_music.duration < video_clip.duration:
+            bg_music = bg_music.with_effects([lambda clip: clip.with_duration(video_clip.duration).with_audio_loop()])
+        else:
+            bg_music = bg_music.subclipped(0, video_clip.duration)
+
+        # Composite with original audio
+        new_audio = CompositeAudioClip([video_clip.audio, bg_music])
+        return video_clip.with_audio(new_audio)
