@@ -9,7 +9,7 @@ class Downloader:
 
     def download(self, url):
         video_opts = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'format': 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][ext=mp4]/best',
             'outtmpl': os.path.join(self.download_dir, 'video.%(ext)s'),
             'merge_output_format': 'mp4',
         }
