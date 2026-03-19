@@ -5,14 +5,35 @@ class SmartCropper:
     def __init__(self):
         self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-    def get_crop_center(self, frame):
+    def get_crop_center(self, frame, previous_center=None):
+        """
+        Determines the crop center based on detected faces, supporting focus switching
+        for multiple speakers.
+        """
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
 
         h, w, _ = frame.shape
 
         if len(faces) > 0:
-            (x, y, fw, fh) = faces[0]
+            # Sort faces by size (proxy for focus/closeness)
+            faces = sorted(faces, key=lambda f: f[2] * f[3], reverse=True)
+
+            # Focus on the most prominent face or the one closest to the previous focus
+            if previous_center and len(faces) > 1:
+                # Switching logic: only switch focus if the new face is significantly closer
+                # or if the current focus is lost.
+                target_face = faces[0]
+                for f in faces:
+                    fx, fy = f[0] + f[2]/2, f[1] + f[3]/2
+                    dist = np.sqrt((fx - previous_center[0])**2 + (fy - previous_center[1])**2)
+                    if dist < 100: # We are still looking at the same speaker
+                         target_face = f
+                         break
+                (x, y, fw, fh) = target_face
+            else:
+                (x, y, fw, fh) = faces[0]
+
             center_x = x + fw / 2
             center_y = y + fh / 2
             return center_x, center_y
@@ -36,9 +57,12 @@ class SmartCropper:
 
     def process_video_crops(self, video_clip):
         centers = []
+        last_center = None
         for t in np.arange(0, video_clip.duration, 0.5):
             frame = video_clip.get_frame(t)
-            centers.append(self.get_crop_center(frame))
+            current_center = self.get_crop_center(frame, previous_center=last_center)
+            centers.append(current_center)
+            last_center = current_center
 
         if not centers:
             return [(video_clip.w / 2, video_clip.h / 2)]

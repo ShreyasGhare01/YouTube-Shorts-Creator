@@ -1,6 +1,7 @@
 import os
 import shutil
 import concurrent.futures
+import librosa
 from moviepy import VideoFileClip
 from ai_shorts_generator.download.downloader import Downloader
 from ai_shorts_generator.transcription.transcriber import Transcriber
@@ -11,6 +12,7 @@ from ai_shorts_generator.captioning.caption_generator import CaptionGenerator
 from ai_shorts_generator.export.metadata_gen import MetadataGenerator
 from ai_shorts_generator.export.exporter import Exporter
 from ai_shorts_generator.hook_generator.hook_gen import HookGenerator
+from ai_shorts_generator.video_editing.broll_manager import BRollManager
 from ai_shorts_generator.utils.cache import SignalCache
 
 class ShortsPipeline:
@@ -23,12 +25,23 @@ class ShortsPipeline:
         self.captioner = CaptionGenerator()
         self.metadata_gen = MetadataGenerator()
         self.hook_gen = HookGenerator()
+        self.broll_manager = BRollManager()
         self.cache = SignalCache()
 
     def _update_progress(self, step, percentage, message):
         if self.progress_callback:
             self.progress_callback(step, percentage, message)
         print(f"[{percentage}%] {step}: {message}")
+
+    def _detect_beats(self, audio_path):
+        try:
+            y, sr = librosa.load(audio_path)
+            tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+            beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+            return beat_times.tolist()
+        except Exception as e:
+            print(f"Beat detection error: {e}")
+            return []
 
     def analyze_signals(self, url):
         cached_signals = self.cache.get(url)
@@ -44,10 +57,12 @@ class ShortsPipeline:
             transcription_future = executor.submit(self.transcriber.transcribe, audio_path)
             audio_analysis_future = executor.submit(self.detector.audio_analyzer.analyze_audio, audio_path)
             motion_analysis_future = executor.submit(self.detector.motion_detector.analyze_motion, video_path)
+            beat_future = executor.submit(self._detect_beats, audio_path)
 
             transcript = transcription_future.result()
             audio_data = audio_analysis_future.result()
             motion_data = motion_analysis_future.result()
+            beat_data = beat_future.result()
 
         if not os.path.exists("temp"):
             os.makedirs("temp")
@@ -59,7 +74,8 @@ class ShortsPipeline:
             "video_info": video_info,
             "transcript": transcript,
             "audio_data": audio_data,
-            "motion_data": motion_data
+            "motion_data": motion_data,
+            "beat_data": beat_data
         }
         self.cache.set(url, signals)
         return signals
@@ -127,7 +143,8 @@ class ShortsPipeline:
             hook_text = self.hook_gen.generate_hook(clip_info['text'])
             base_clip = self.editor.process_clip(
                 signals['video_path'], clip_info['start'], clip_info['end'], f"short_{i+1}_raw.mp4",
-                mood=mood, intensity=editing_intensity, ending_style=ending_style
+                mood=mood, intensity=editing_intensity, ending_style=ending_style,
+                beat_data=signals.get('beat_data')
             )
             final_clip = self.captioner.add_captions(
                 base_clip, signals['transcript'], clip_info['start'],

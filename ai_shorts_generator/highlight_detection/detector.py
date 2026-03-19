@@ -3,6 +3,7 @@ import re
 from .sentiment import SentimentAnalyzer
 from .motion import MotionDetector
 from .audio_analysis import AudioAnalyzer
+from .virality_predictor import ViralityPredictor
 
 class HighlightDetector:
     def __init__(self):
@@ -10,6 +11,7 @@ class HighlightDetector:
         self.sentiment_analyzer = SentimentAnalyzer()
         self.motion_detector = MotionDetector()
         self.audio_analyzer = AudioAnalyzer()
+        self.virality_predictor = ViralityPredictor()
 
     def score_transcript_keywords(self, text):
         text = text.lower()
@@ -44,13 +46,16 @@ class HighlightDetector:
             keyword_score = self.score_transcript_keywords(segment['text'])
 
             scene_change_score = visual_motion / 10.0
+            virality_score = self.virality_predictor.predict_virality(segment['text'])
 
+            # Incorporating the new virality score into a balanced weighted formula
             viral_score = (
-                0.30 * speech_emotion +
-                0.20 * keyword_score +
-                0.20 * (visual_motion / 5.0) +
-                0.15 * (audio_intensity * 10) +
-                0.15 * min(1.0, scene_change_score)
+                0.25 * speech_emotion +
+                0.25 * virality_score +
+                0.15 * keyword_score +
+                0.15 * (visual_motion / 5.0) +
+                0.10 * (audio_intensity * 10) +
+                0.10 * min(1.0, scene_change_score)
             )
 
             scores.append({

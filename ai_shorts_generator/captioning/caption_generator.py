@@ -39,14 +39,23 @@ class CaptionGenerator:
                         continue
 
                     try:
-                        # Styling based on choice
+                        # Styling based on choice and keywords
                         font_size = 70 if style == "viral" else 40
                         color = 'white'
-                        if style == "viral" and any(k in word_info['word'].lower() for k in ["crazy", "wow", "insane", "unbelievable"]):
-                            color = 'yellow'
+                        word_text = word_info['word']
+
+                        # AI color shifting based on keyword emotion
+                        if style == "viral":
+                            word_lower = word_text.lower()
+                            if any(k in word_lower for k in ["crazy", "wow", "insane", "unbelievable", "shocking"]):
+                                color = 'yellow'
+                            elif any(k in word_lower for k in ["bad", "wrong", "error", "horrible"]):
+                                color = 'red'
+                            elif any(k in word_lower for k in ["good", "great", "success", "winner"]):
+                                color = 'green'
 
                         txt_clip = TextClip(
-                            text=word_info['word'].upper() if style != "clean" else word_info['word'],
+                            text=word_text.upper() if style != "clean" else word_text,
                             font_size=font_size,
                             color=color,
                             stroke_color='black' if style != "clean" else None,
@@ -54,6 +63,23 @@ class CaptionGenerator:
                             method='label',
                             duration=word_end - word_start
                         ).with_start(start_relative).with_position(('center', 1400 if style != "clean" else 1700))
+
+                        # Basic "pop" animation for viral style
+                        if style == "viral":
+                            # Dynamic zoom effect (1.0 to 1.1)
+                            def zoom_effect(get_frame, t):
+                                frame = get_frame(t)
+                                zoom = 1.0 + 0.1 * (1 - (t/(word_end-word_start)))
+                                h, w = frame.shape[:2]
+                                new_h, new_w = int(h * zoom), int(w * zoom)
+                                import cv2
+                                resized = cv2.resize(frame, (new_w, new_h))
+                                # Crop to original size
+                                start_h = (new_h - h) // 2
+                                start_w = (new_w - w) // 2
+                                return resized[start_h:start_h+h, start_w:start_w+w]
+
+                            txt_clip = txt_clip.transform(zoom_effect)
 
                         clips_to_composite.append(txt_clip)
                     except Exception as e:
