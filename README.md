@@ -21,6 +21,9 @@ The AI YouTube Shorts Generator uses state-of-the-art AI models to analyze video
 Make sure you have the following installed on your Windows machine:
 *   **Python 3.10+**: [Download from Python.org](https://www.python.org/downloads/windows/) (Ensure "Add Python to PATH" is checked during installation)
 *   **Node.js & npm**: [Download from Nodejs.org](https://nodejs.org/)
+*   **ImageMagick (Essential for Captions)**: [Download from ImageMagick.org](https://imagemagick.org/script/download.php#windows)
+    *   **CRITICAL:** During installation, check the box: **"Install legacy utilities (e.g. convert)"**.
+    *   Restart your computer after installation.
 
 ### 2. Install Python Dependencies
 Open **Command Prompt** (cmd) or **PowerShell** in the project folder and run:
@@ -83,3 +86,13 @@ cd ..\..\..\
     *   `video_editing\`: Smart cropping and rendering.
     *   `hook_generator\`: LLM hook creation.
     *   `export\`: Default output folder.
+
+---
+
+## 📈 Future Roadmap
+
+Looking to scale your AI content creation? Check out our [Future Recommendations & Roadmap](RECOMMENDATIONS.md) for 15 detailed feature improvements, including:
+- AI Virality Prediction
+- Auto-Posting to YouTube API
+- Dynamic B-Roll & Meme Insertion
+- Multi-Speaker Face Tracking
