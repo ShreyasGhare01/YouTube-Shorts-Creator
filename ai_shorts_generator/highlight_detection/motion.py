@@ -13,7 +13,9 @@ class MotionDetector:
             cap.release()
             return []
 
-        prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
+        # Resize for performance
+        prev_frame_small = cv2.resize(prev_frame, (160, 90))
+        prev_gray = cv2.cvtColor(prev_frame_small, cv2.COLOR_BGR2GRAY)
 
         frame_idx = 0
         while True:
@@ -27,7 +29,9 @@ class MotionDetector:
                 break
             frame_idx += 1
 
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            # Resize for performance
+            frame_small = cv2.resize(frame, (160, 90))
+            gray = cv2.cvtColor(frame_small, cv2.COLOR_BGR2GRAY)
             diff = cv2.absdiff(prev_gray, gray)
             motion_score = np.mean(diff)
 
