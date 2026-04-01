@@ -3,7 +3,8 @@ import numpy as np
 
 class AudioAnalyzer:
     def analyze_audio(self, audio_path):
-        y, sr = librosa.load(audio_path)
+        # Using a lower sampling rate for faster analysis and lower memory usage
+        y, sr = librosa.load(audio_path, sr=16000)
         rms = librosa.feature.rms(y=y)[0]
         times = librosa.frames_to_time(range(len(rms)), sr=sr)
         return list(zip(times, rms))

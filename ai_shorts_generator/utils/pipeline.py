@@ -35,7 +35,8 @@ class ShortsPipeline:
 
     def _detect_beats(self, audio_path):
         try:
-            y, sr = librosa.load(audio_path)
+            # Use lower sampling rate for beat detection to save time/memory
+            y, sr = librosa.load(audio_path, sr=22050)
             tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
             beat_times = librosa.frames_to_time(beat_frames, sr=sr)
             return beat_times.tolist()
@@ -43,9 +44,14 @@ class ShortsPipeline:
             print(f"Beat detection error: {e}")
             return []
 
-    def analyze_signals(self, url):
+    def analyze_signals(self, url, run_beat_detection=False):
         cached_signals = self.cache.get(url)
         if cached_signals:
+            if run_beat_detection and not cached_signals.get('beat_data'):
+                self._update_progress("Analyzing", 35, "Running deferred beat detection...")
+                cached_signals['beat_data'] = self._detect_beats(cached_signals['audio_path'])
+                self.cache.set(url, cached_signals)
+
             self._update_progress("Analyzing", 30, "Using cached analysis...")
             return cached_signals
 
@@ -57,16 +63,34 @@ class ShortsPipeline:
             transcription_future = executor.submit(self.transcriber.transcribe, audio_path)
             audio_analysis_future = executor.submit(self.detector.audio_analyzer.analyze_audio, audio_path)
             motion_analysis_future = executor.submit(self.detector.motion_detector.analyze_motion, video_path)
-            beat_future = executor.submit(self._detect_beats, audio_path)
 
-            transcript = transcription_future.result()
-            audio_data = audio_analysis_future.result()
-            motion_data = motion_analysis_future.result()
-            beat_data = beat_future.result()
+            futures = {
+                "transcript": transcription_future,
+                "audio_data": audio_analysis_future,
+                "motion_data": motion_analysis_future
+            }
+
+            if run_beat_detection:
+                futures["beat_data"] = executor.submit(self._detect_beats, audio_path)
+
+            results = {}
+            for name, future in futures.items():
+                try:
+                    results[name] = future.result()
+                except Exception as e:
+                    print(f"Error in {name}: {e}")
+                    results[name] = [] if name != "transcript" else None
+
+            transcript = results.get("transcript")
+            audio_data = results.get("audio_data", [])
+            motion_data = results.get("motion_data", [])
+            beat_data = results.get("beat_data", [])
 
         if not os.path.exists("temp"):
             os.makedirs("temp")
-        self.transcriber.save_transcript(transcript, "temp/transcript.json")
+
+        if transcript:
+            self.transcriber.save_transcript(transcript, "temp/transcript.json")
 
         signals = {
             "video_path": video_path,
@@ -81,7 +105,15 @@ class ShortsPipeline:
         return signals
 
     def generate_previews(self, url, preferred_duration=None):
-        signals = self.analyze_signals(url)
+        try:
+            signals = self.analyze_signals(url)
+        except Exception as e:
+            self._update_progress("Error", 0, f"Signal analysis failed: {str(e)}")
+            raise
+
+        if not signals.get('transcript'):
+            self._update_progress("Error", 0, "No transcript generated. Video might be silent or in unsupported format.")
+            raise ValueError("No transcript generated.")
 
         self._update_progress("Highlight Detection", 50, "Detecting top viral moments...")
         highlight_scores = self.detector.get_highlight_scores_with_data(
@@ -123,7 +155,7 @@ class ShortsPipeline:
                  mood="serious", music_style="auto", ending_style="hard_cut", caption_style="viral", editing_intensity=3):
 
         exporter = Exporter(export_dir=export_path)
-        signals = self.analyze_signals(url)
+        signals = self.analyze_signals(url, run_beat_detection=True)
 
         if selected_clips:
             clips_to_process = selected_clips
