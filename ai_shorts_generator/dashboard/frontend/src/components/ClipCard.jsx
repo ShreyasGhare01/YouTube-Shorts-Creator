@@ -3,8 +3,8 @@ import { Check, X, Clock, Zap, ExternalLink } from 'lucide-react';
 
 const ClipCard = ({ clip, isApproved, onToggle }) => {
   return (
-    <div className={`group relative bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-500 ${
-      isApproved ? 'border-green-500 ring-4 ring-green-50' : 'border-slate-100 opacity-50 grayscale'
+    <div className={`group relative glass-card rounded-2xl overflow-hidden  border-2 transition-all duration-500 ${
+      isApproved ? 'border-green-500 ring-4 ring-green-50' : 'border-white/5 opacity-50 grayscale'
     }`}>
       <div className="aspect-video bg-slate-900 relative overflow-hidden">
         <video
@@ -23,7 +23,7 @@ const ClipCard = ({ clip, isApproved, onToggle }) => {
           <span className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
             <Clock size={14} className="text-blue-500"/> {Math.floor(clip.start)}s - {Math.floor(clip.end)}s
           </span>
-          <span className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md">
+          <span className="bg-blue-50 text-accent px-2 py-1 rounded-md">
             {Math.round(clip.end - clip.start)}s clip
           </span>
         </div>
@@ -39,8 +39,8 @@ const ClipCard = ({ clip, isApproved, onToggle }) => {
             onClick={() => onToggle(clip.id, true)}
             className={`flex-1 py-3 rounded-xl text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 ${
               isApproved
-                ? 'bg-green-600 text-white shadow-lg shadow-green-200'
-                : 'bg-slate-100 text-slate-500 hover:bg-green-50 hover:text-green-600'
+                ? 'bg-green-600 text-white  shadow-green-200'
+                : 'bg-slate-100 text-muted hover:bg-green-50 hover:text-green-600'
             }`}
           >
             <Check size={18} strokeWidth={3} /> Approve
@@ -49,8 +49,8 @@ const ClipCard = ({ clip, isApproved, onToggle }) => {
             onClick={() => onToggle(clip.id, false)}
             className={`flex-1 py-3 rounded-xl text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 ${
               !isApproved
-                ? 'bg-red-500 text-white shadow-lg shadow-red-200'
-                : 'bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500'
+                ? 'bg-red-500 text-white  shadow-red-200'
+                : 'bg-slate-100 text-muted hover:bg-red-50 hover:text-red-500'
             }`}
           >
             <X size={18} strokeWidth={3} /> Reject

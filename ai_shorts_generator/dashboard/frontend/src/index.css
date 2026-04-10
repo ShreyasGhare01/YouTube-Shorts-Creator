@@ -1,3 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #080a0f;
+    --surface: #0e1118;
+    --surface2: #161b27;
+    --border: rgba(255,255,255,0.07);
+    --accent: #e8ff47;
+    --accent2: #ff4f6e;
+    --text: #f0f2f7;
+    --muted: #6b7280;
+    --glow: rgba(232,255,71,0.18);
+  }
+
+  body {
+    @apply bg-bg text-text font-dm font-light min-h-screen overflow-x-hidden;
+  }
+
+  /* Noise grain overlay */
+  body::before {
+    content: '';
+    @apply fixed inset-0 pointer-events-none opacity-40;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    z-index: 1000;
+  }
+
+  h1, h2, h3, .font-syne {
+    @apply font-syne;
+  }
+}
+
+@layer components {
+  .blob {
+    @apply fixed rounded-full pointer-events-none animate-drift;
+    filter: blur(100px);
+    z-index: 0;
+  }
+
+  .glass-card {
+    @apply bg-surface border border-white/5 rounded-2xl overflow-hidden relative;
+  }
+
+  .glass-card::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: linear-gradient(135deg, rgba(232,255,71,0.04) 0%, transparent 60%);
+  }
+}

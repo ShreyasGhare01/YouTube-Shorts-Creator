@@ -31,7 +31,7 @@ const HelpSection = () => {
   ];
 
   return (
-    <section id="help" className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
+    <section id="help" className="glass-card rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden">
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 md:p-12 text-white">
         <div className="flex items-center gap-4 mb-4">
           <HelpCircle size={32} className="text-blue-100" />
@@ -52,12 +52,12 @@ const HelpSection = () => {
             viewport={{ once: true }}
             className="flex flex-col gap-4 p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300"
           >
-            <div className="bg-white w-14 h-14 rounded-2xl shadow-sm flex items-center justify-center border border-slate-100">
+            <div className="glass-card w-14 h-14 rounded-2xl shadow-sm flex items-center justify-center border border-white/5">
               {step.icon}
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">{idx + 1}. {step.title}</h3>
-              <p className="text-slate-600 text-sm leading-relaxed mb-4">{step.description}</p>
+              <h3 className="text-xl font-black text-text font-syne mb-2">{idx + 1}. {step.title}</h3>
+              <p className="text-muted text-sm leading-relaxed mb-4">{step.description}</p>
 
               <div className="bg-blue-100/50 p-3 rounded-xl border border-blue-200/50">
                 <div className="flex items-center gap-1.5 text-blue-800 text-[10px] font-black uppercase tracking-widest mb-1">

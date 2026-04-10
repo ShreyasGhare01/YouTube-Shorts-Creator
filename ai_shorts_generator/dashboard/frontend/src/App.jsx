@@ -8,7 +8,7 @@ import ClipGrid from './components/ClipGrid';
 import CreativeControls from './components/CreativeControls';
 import HelpSection from './components/HelpSection';
 import ViralAnalytics from './components/ViralAnalytics';
-import { Play, Eye, Sparkles, AlertCircle, LayoutDashboard, HelpCircle } from 'lucide-react';
+import { Play, Eye, Sparkles, AlertCircle, LayoutDashboard, HelpCircle, Link as LinkIcon, CheckCircle, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const App = () => {
@@ -147,71 +147,96 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-32 selection:bg-blue-100">
-      {/* Navigation Bar */}
-      <nav className="sticky top-0 z-[100] bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm px-4 md:px-8 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-bg text-text selection:bg-accent/30">
+      {/* Ambient Blobs */}
+      <div className="blob w-[500px] h-[500px] bg-accent/5 top-[-150px] right-[-100px]" />
+      <div className="blob w-[400px] h-[400px] bg-accent2/5 bottom-[100px] left-[-120px] [animation-delay:-5s]" />
+      <div className="blob w-[300px] h-[300px] bg-blue-500/5 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 [animation-delay:-3s]" />
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-[500] flex items-center justify-between px-6 md:px-12 py-4 backdrop-blur-2xl bg-bg/70 border-b border-white/5">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
-             <Sparkles className="text-white" size={24} />
+          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center animate-pulse-glow shadow-[0_0_20px_rgba(232,255,71,0.2)]">
+             <Play className="text-bg" size={16} fill="currentColor" />
           </div>
-          <span className="text-2xl font-black text-slate-900 tracking-tight">
-            Shorts<span className="text-blue-600">AI</span>
+          <span className="font-syne font-extrabold text-xl tracking-tight">
+            Shorts<span className="text-accent">AI</span>
           </span>
         </div>
 
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
+        <div className="flex bg-surface2/50 p-1 rounded-xl border border-white/5">
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`px-5 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${activeTab === 'dashboard' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${activeTab === 'dashboard' ? 'bg-surface2 text-accent shadow-lg' : 'text-muted hover:text-text'}`}
           >
-            <LayoutDashboard size={18} /> Dashboard
+            <LayoutDashboard size={16} /> Dashboard
           </button>
           <button
             onClick={() => setActiveTab('help')}
-            className={`px-5 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${activeTab === 'help' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${activeTab === 'help' ? 'bg-surface2 text-accent shadow-lg' : 'text-muted hover:text-text'}`}
           >
-            <HelpCircle size={18} /> How It Works
+            <HelpCircle size={16} /> How It Works
           </button>
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-24">
         <AnimatePresence mode="wait">
           {activeTab === 'dashboard' ? (
             <motion.div
               key="dashboard"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-12"
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-16"
             >
-              <header className="max-w-3xl">
-                <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight mb-4">
-                  Create Viral Shorts <span className="text-blue-600 block md:inline">Instantly.</span>
+              <header className="text-center max-w-3xl mx-auto space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/5 text-accent text-[10px] uppercase font-bold tracking-widest"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  Powered by 15+ specialized AI models
+                </motion.div>
+
+                <h1 className="text-6xl md:text-7xl font-syne font-extrabold tracking-tighter leading-[0.95]">
+                  Create <span className="text-transparent bg-clip-text bg-gradient-to-br from-accent to-[#aaff00]">Viral Shorts</span> Instantly.
                 </h1>
-                <p className="text-xl text-slate-500 font-medium leading-relaxed">
-                  The automated pipeline to turn long-form content into viral vertical shorts. Powered by over 15+ specialized AI models.
+
+                <p className="text-lg text-muted font-light leading-relaxed max-w-xl mx-auto">
+                  The automated pipeline to turn long-form content into viral vertical shorts — optimized for engagement and reach.
                 </p>
+
+                <div className="flex items-center justify-center gap-4 text-xs text-muted">
+                  <div className="flex gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent2 animate-pip-wave" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent2 animate-pip-wave [animation-delay:0.15s]" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent2 animate-pip-wave [animation-delay:0.3s]" />
+                  </div>
+                  Scene detection · Auto-captioning · Viral scoring · Face tracking
+                </div>
               </header>
 
               {error && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-red-50 border border-red-100 p-6 rounded-[2rem] shadow-xl shadow-red-500/5 flex items-start gap-5"
+                  className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 text-red-400"
                 >
-                  <div className="bg-red-500 p-3 rounded-2xl text-white shadow-lg shadow-red-500/20">
-                    <AlertCircle size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-red-900 uppercase tracking-tight text-sm mb-1">Processing Error</h3>
-                    <p className="text-red-700 font-medium">{error}</p>
-                  </div>
+                  <AlertCircle size={20} />
+                  <p className="text-sm font-medium">{error}</p>
                 </motion.div>
               )}
 
-              <div className="grid gap-12">
-                <section className="space-y-8">
+              <div className="space-y-12">
+                {/* Step 1: URL Input */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-muted uppercase tracking-widest">
+                    <div className="w-5 h-5 rounded-md bg-surface2 border border-white/5 flex items-center justify-center text-accent">1</div>
+                    YouTube Video Link
+                  </div>
+
                   <YouTubeInput
                     url={url}
                     setUrl={setUrl}
@@ -233,27 +258,30 @@ const App = () => {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex justify-center py-10"
+                    className="flex justify-center"
                   >
                     <button
                       onClick={generatePreviews}
-                      className="group relative bg-blue-600 hover:bg-blue-700 text-white text-3xl font-black py-8 px-20 rounded-[2.5rem] shadow-2xl shadow-blue-500/30 flex items-center gap-6 transition-all hover:scale-[1.03] active:scale-[0.97]"
+                      className="group relative px-8 py-4 bg-accent hover:bg-accent/90 text-bg font-syne font-bold rounded-xl shadow-[0_0_30px_rgba(232,255,71,0.2)] transition-all hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
                     >
-                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <Eye size={40} strokeWidth={2.5} /> Generate Clip Previews
+                      <Eye size={20} strokeWidth={2.5} /> Generate Clip Previews
                     </button>
                   </motion.div>
                 )}
 
                 {isGeneratingPreviews && (
-                  <div className="text-center py-32 bg-white rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-blue-50/30 group-hover:bg-blue-50/50 transition-colors duration-1000" />
-                    <div className="relative">
-                      <div className="inline-block animate-spin rounded-full h-24 w-24 border-t-[6px] border-b-[6px] border-blue-600 mb-10 shadow-xl shadow-blue-500/20"></div>
-                      <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Analyzing Viral Potential</h2>
-                      <p className="text-slate-500 text-xl font-medium">Scanning audio, motion, and transcript for the best moments...</p>
-                      {progress && <div className="max-w-2xl mx-auto mt-12 px-6"><ProgressDisplay progress={progress} /></div>}
+                  <div className="glass-card p-12 text-center space-y-8">
+                    <div className="relative inline-block">
+                      <div className="w-20 h-20 rounded-full border-t-2 border-r-2 border-accent animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Sparkles className="text-accent" size={24} />
+                      </div>
                     </div>
+                    <div>
+                      <h2 className="text-2xl font-syne font-bold mb-2">Analyzing Viral Potential</h2>
+                      <p className="text-muted text-sm">Scanning audio, motion, and transcript for the best moments...</p>
+                    </div>
+                    {progress && <div className="max-w-md mx-auto"><ProgressDisplay progress={progress} /></div>}
                   </div>
                 )}
 
@@ -261,20 +289,34 @@ const App = () => {
                   <div className="space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                     <ViralAnalytics clips={clips} />
 
-                    <ClipGrid
-                      clips={clips}
-                      approvedClipIds={approvedClipIds}
-                      onToggleApproval={toggleClipApproval}
-                      onSelectAll={() => setApprovedClipIds(clips.map(c => c.id))}
-                      onDeselectAll={() => setApprovedClipIds([])}
-                      targetShortCount={shortCount}
-                    />
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-2 text-[10px] font-bold text-muted uppercase tracking-widest">
+                            <div className="w-5 h-5 rounded-md bg-surface2 border border-white/5 flex items-center justify-center text-accent">2</div>
+                            Review & Select Clips
+                         </div>
+                      </div>
+                      <ClipGrid
+                        clips={clips}
+                        approvedClipIds={approvedClipIds}
+                        onToggleApproval={toggleClipApproval}
+                        onSelectAll={() => setApprovedClipIds(clips.map(c => c.id))}
+                        onDeselectAll={() => setApprovedClipIds([])}
+                        targetShortCount={shortCount}
+                      />
+                    </div>
 
-                    <CreativeControls
-                      settings={creativeSettings}
-                      setSettings={setCreativeSettings}
-                      onApplyPreset={applyPreset}
-                    />
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-muted uppercase tracking-widest">
+                        <div className="w-5 h-5 rounded-md bg-surface2 border border-white/5 flex items-center justify-center text-accent">3</div>
+                        Creative Controls
+                      </div>
+                      <CreativeControls
+                        settings={creativeSettings}
+                        setSettings={setCreativeSettings}
+                        onApplyPreset={applyPreset}
+                      />
+                    </div >
 
                     <div className="space-y-12">
                       <GenerationOptions
@@ -285,14 +327,13 @@ const App = () => {
                         disabled={isFinalGenerating}
                       />
 
-                      <div className="flex justify-center sticky bottom-10 z-50 px-4">
+                      <div className="flex justify-center pt-8">
                         <button
                           onClick={startGeneration}
                           disabled={approvedClipIds.length === 0 || !exportPath || isFinalGenerating}
-                          className="group relative w-full md:w-4/5 flex justify-center py-10 px-12 border border-transparent text-4xl font-black rounded-[2.5rem] text-white bg-green-600 hover:bg-green-700 shadow-2xl shadow-green-600/30 transition-all transform hover:-translate-y-2 active:translate-y-0 disabled:bg-slate-300 disabled:transform-none disabled:shadow-none overflow-hidden"
+                          className="group relative w-full max-w-lg py-5 bg-green-500 hover:bg-green-400 disabled:bg-surface2 text-bg font-syne font-bold text-xl rounded-2xl shadow-xl shadow-green-500/20 transition-all hover:-translate-y-1 active:translate-y-0 flex justify-center items-center gap-4"
                         >
-                          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <Play className="mr-6" size={48} fill="currentColor" />
+                          <Play size={24} fill="currentColor" />
                           {isFinalGenerating ? 'Rendering Shorts...' : 'Finalize & Render'}
                         </button>
                       </div>
@@ -301,7 +342,7 @@ const App = () => {
                 )}
 
                 {progress && (isFinalGenerating || progress.percentage === 100) && (
-                  <div className="max-w-4xl mx-auto w-full">
+                  <div className="max-w-2xl mx-auto w-full pt-12">
                     <ProgressDisplay progress={progress} />
                   </div>
                 )}
@@ -310,15 +351,24 @@ const App = () => {
           ) : (
             <motion.div
               key="help"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -20 }}
             >
               <HelpSection />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+
+      <footer className="relative z-10 border-t border-white/5 py-8 px-12 flex flex-col md:flex-row items-center justify-between text-[11px] text-muted tracking-wider uppercase font-bold">
+        <span>© 2025 ShortsAI. All rights reserved.</span>
+        <div className="flex gap-8 mt-4 md:mt-0">
+          <a href="#" className="hover:text-accent transition-colors">Privacy</a>
+          <a href="#" className="hover:text-accent transition-colors">Terms</a>
+          <a href="#" className="hover:text-accent transition-colors">Contact</a>
+        </div>
+      </footer>
     </div>
   );
 };

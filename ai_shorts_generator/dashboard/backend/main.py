@@ -18,13 +18,15 @@ app.add_middleware(
 os.makedirs("temp/previews", exist_ok=True)
 app.mount("/previews", StaticFiles(directory="temp/previews"), name="previews")
 
-app.include_router(video_routes.router)
-app.include_router(processing_routes.router)
-
-# Serve frontend at the end to avoid intercepting API routes
-frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
-if os.path.exists(frontend_dist):
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+app.include_router(video_routes.router, prefix="/api")
+app.include_router(processing_routes.router, prefix="/api")
+
+# Serve frontend at the end to avoid intercepting API routes
+current_dir = os.path.dirname(os.path.abspath(__file__))
+frontend_dist = os.path.normpath(os.path.join(current_dir, "..", "frontend", "dist"))
+if os.path.exists(frontend_dist):
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")

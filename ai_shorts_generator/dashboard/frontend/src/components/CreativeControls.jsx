@@ -14,20 +14,20 @@ const CreativeControls = ({ settings, setSettings, onApplyPreset }) => {
   ];
 
   return (
-    <div className="bg-white p-8 rounded-[2rem] shadow-2xl border border-slate-100 space-y-10">
+    <div className="glass-card p-8 rounded-[2rem] shadow-2xl border border-slate-100 space-y-10">
       <div className="flex items-center justify-between border-b pb-6">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100 text-white">
             <Palette size={28} />
           </div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Creative Controls</h2>
+          <h2 className="text-3xl font-black text-text font-syne tracking-tight">Creative Controls</h2>
         </div>
         <div className="flex gap-2">
           {presets.map(p => (
             <button
               key={p.name}
               onClick={() => onApplyPreset(p)}
-              className="px-4 py-2 bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-full text-xs font-black uppercase tracking-widest border border-slate-200 hover:border-indigo-200 transition-all active:scale-95"
+              className="px-4 py-2 bg-surface2 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-full text-xs font-black uppercase tracking-widest border border-white/5 hover:border-indigo-200 transition-all active:scale-95"
             >
               {p.name}
             </button>
@@ -43,7 +43,7 @@ const CreativeControls = ({ settings, setSettings, onApplyPreset }) => {
           <select
             value={settings.mood}
             onChange={(e) => handleChange('mood', e.target.value)}
-            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
+            className="w-full p-4 bg-surface2 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
           >
             <option value="funny">Funny / Comedy</option>
             <option value="serious">Serious / Informational</option>
@@ -60,7 +60,7 @@ const CreativeControls = ({ settings, setSettings, onApplyPreset }) => {
           <select
             value={settings.music_style}
             onChange={(e) => handleChange('music_style', e.target.value)}
-            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
+            className="w-full p-4 bg-surface2 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
           >
             <option value="auto">Auto (AI decides)</option>
             <option value="none">None</option>
@@ -78,7 +78,7 @@ const CreativeControls = ({ settings, setSettings, onApplyPreset }) => {
           <select
             value={settings.ending_style}
             onChange={(e) => handleChange('ending_style', e.target.value)}
-            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
+            className="w-full p-4 bg-surface2 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
           >
             <option value="hard_cut">Hard Cut</option>
             <option value="fade_out">Fade Out</option>
@@ -94,7 +94,7 @@ const CreativeControls = ({ settings, setSettings, onApplyPreset }) => {
           <select
             value={settings.caption_style}
             onChange={(e) => handleChange('caption_style', e.target.value)}
-            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
+            className="w-full p-4 bg-surface2 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all cursor-pointer"
           >
             <option value="viral">Bold Viral</option>
             <option value="clean">Clean Minimal</option>
@@ -126,7 +126,7 @@ const CreativeControls = ({ settings, setSettings, onApplyPreset }) => {
             <label className="flex items-center gap-2 text-sm font-black text-slate-400 uppercase tracking-widest">
               <Sliders size={16} className="text-blue-500" /> Editing Intensity
             </label>
-            <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-black">Level {settings.editing_intensity}</span>
+            <span className="bg-blue-50 text-accent px-3 py-1 rounded-full text-xs font-black">Level {settings.editing_intensity}</span>
           </div>
           <input
             type="range"
@@ -144,12 +144,12 @@ const CreativeControls = ({ settings, setSettings, onApplyPreset }) => {
         <div className="relative z-10">
           <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Configuration Summary</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <p className="text-white font-bold"><span className="text-slate-500 font-medium">Mood:</span> {settings.mood.replace('_', ' ')}</p>
-            <p className="text-white font-bold"><span className="text-slate-500 font-medium">Music:</span> {settings.music_style}</p>
-            <p className="text-white font-bold"><span className="text-slate-500 font-medium">Style:</span> {settings.caption_style}</p>
+            <p className="text-white font-bold"><span className="text-muted font-medium">Mood:</span> {settings.mood.replace('_', ' ')}</p>
+            <p className="text-white font-bold"><span className="text-muted font-medium">Music:</span> {settings.music_style}</p>
+            <p className="text-white font-bold"><span className="text-muted font-medium">Style:</span> {settings.caption_style}</p>
           </div>
         </div>
-        <div className="relative z-10 flex items-center gap-3 bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
+        <div className="relative z-10 flex items-center gap-3 glass-card/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
           <div className="text-right hidden sm:block">
             <p className="text-white font-black text-sm uppercase tracking-tighter leading-none mb-1">Human-in-the-Loop</p>
             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Creative override active</p>
