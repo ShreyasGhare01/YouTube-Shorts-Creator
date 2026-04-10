@@ -10,7 +10,11 @@ class VideoInfoRequest(BaseModel):
 @router.post("/get_video_info")
 async def get_video_info(request: VideoInfoRequest):
     try:
-        ydl_opts = {'quiet': True, 'no_warnings': True}
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'js_runtimes': {'node': {}}
+        }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(request.url, download=False)
             return {

@@ -12,13 +12,13 @@ class Downloader:
             'format': 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][ext=mp4]/best',
             'outtmpl': os.path.join(self.download_dir, 'video.%(ext)s'),
             'merge_output_format': 'mp4',
-            'js_runtimes': ['node'], # Explicitly use node for JS extraction
+            'js_runtimes': {'node': {}}, # Explicitly use node for JS extraction
         }
 
         audio_opts = {
             'format': 'bestaudio/best',
             'outtmpl': os.path.join(self.download_dir, 'audio.%(ext)s'),
-            'js_runtimes': ['node'],
+            'js_runtimes': {'node': {}},
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'wav',

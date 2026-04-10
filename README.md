@@ -34,9 +34,9 @@ pip install -r ai_shorts_generator\requirements.txt
 ### 3. Setup Frontend Dashboard
 In the same terminal, run:
 ```cmd
-cd ai_shorts_generator\dashboard\frontend
+cd ai_shorts_generator/dashboard/frontend
 npm install
-cd ..\..\..\
+cd ../../../
 ```
 
 ---
@@ -48,13 +48,12 @@ cd ..\..\..\
 1.  **Start the Backend Server:**
     Open a terminal in the root folder and run:
     ```cmd
-    set PYTHONPATH=.
-    uvicorn ai_shorts_generator.dashboard.backend.main:app --port 8000
+    python -m uvicorn ai_shorts_generator.dashboard.backend.main:app --port 8000
     ```
 2.  **Start the Frontend Dashboard:**
     Open a **NEW** terminal window, navigate to the frontend folder, and run:
     ```cmd
-    cd ai_shorts_generator\dashboard\frontend
+    cd ai_shorts_generator/dashboard/frontend
     npm run dev
     ```
 3.  **Open the Dashboard:**
