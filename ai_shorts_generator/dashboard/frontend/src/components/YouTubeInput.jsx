@@ -1,24 +1,24 @@
 import React from 'react';
-import { Search, Link as LinkIcon, Play } from 'lucide-react';
+import { Play, Link as LinkIcon } from 'lucide-react';
 
 const YouTubeInput = ({ url, setUrl, onFetchInfo, isLoading, disabled }) => {
   return (
-    <div className={`glass-card p-2 pr-2 pl-6 flex flex-col sm:flex-row items-center gap-4 transition-all ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-      <div className="flex items-center gap-3 flex-1 w-full">
+    <div className={`url-card flex flex-col sm:flex-row items-center gap-[10px] transition-all ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div className="flex items-center gap-3 flex-1 w-full pl-5 py-2">
         <LinkIcon className="text-muted flex-shrink-0" size={18} />
         <input
-          type="text"
+          type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={disabled || isLoading}
           placeholder="Paste YouTube URL here…"
-          className="w-full py-4 bg-transparent outline-none text-sm font-medium text-text placeholder:text-muted caret-accent"
+          className="w-full bg-transparent outline-none text-[0.95rem] font-medium text-text placeholder:text-muted caret-accent py-[14px]"
         />
       </div>
       <button
         onClick={onFetchInfo}
         disabled={disabled || isLoading || !url}
-        className="load-btn w-full sm:w-auto"
+        className="load-btn h-[46px] m-1.5"
       >
         {isLoading ? (
           <div className="h-4 w-4 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
