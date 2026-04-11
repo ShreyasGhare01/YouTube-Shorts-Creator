@@ -84,7 +84,7 @@ const App = () => {
 
   const setupWebSocket = () => {
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${protocol}://${window.location.host}/ws/progress?task_id=${encodeURIComponent(url)}`);
+    const ws = new WebSocket(`${protocol}://${window.location.host}/api/ws/progress?task_id=${encodeURIComponent(url)}`);
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
