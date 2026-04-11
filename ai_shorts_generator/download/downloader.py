@@ -1,6 +1,11 @@
 import os
 import yt_dlp
 
+class DummyLogger:
+    def debug(self, msg): pass
+    def warning(self, msg): pass
+    def error(self, msg): pass
+
 class Downloader:
     def __init__(self, download_dir='temp/download'):
         self.download_dir = download_dir
@@ -8,17 +13,27 @@ class Downloader:
             os.makedirs(self.download_dir)
 
     def download(self, url):
+        common_opts = {
+            'js_runtimes': {'node': {}},
+            'cache_dir': False,
+            'noprogress': True,
+            'no_color': True,
+            'logger': DummyLogger(),
+            'quiet': True,
+            'no_warnings': True
+        }
+
         video_opts = {
+            **common_opts,
             'format': 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][ext=mp4]/best',
             'outtmpl': os.path.join(self.download_dir, 'video.%(ext)s'),
             'merge_output_format': 'mp4',
-            'js_runtimes': {'node': {}}, # Explicitly use node for JS extraction
         }
 
         audio_opts = {
+            **common_opts,
             'format': 'bestaudio/best',
             'outtmpl': os.path.join(self.download_dir, 'audio.%(ext)s'),
-            'js_runtimes': {'node': {}},
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'wav',
