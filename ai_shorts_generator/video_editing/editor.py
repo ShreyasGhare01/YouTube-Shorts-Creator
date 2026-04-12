@@ -2,6 +2,7 @@ from moviepy import VideoFileClip, ColorClip, CompositeVideoClip, TextClip, Imag
 from moviepy.video.fx import Resize, Crop, CrossFadeOut, MultiplyColor, GammaCorrection
 import os
 import numpy as np
+import cv2
 from .smart_cropper import SmartCropper
 
 class VideoEditor:
@@ -63,7 +64,6 @@ class VideoEditor:
 
             cropped = frame[int(y1):int(y2), int(x1):int(x2)]
             # Ensure the frame is resized back to the target size for consistent dimensions
-            import cv2
             return cv2.resize(cropped, (int(crop_w * zoom_factor), int(crop_h * zoom_factor)))
 
         video = video.transform(transform_frame)
