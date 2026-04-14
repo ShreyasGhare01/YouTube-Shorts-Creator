@@ -58,25 +58,23 @@ class ShortsPipeline:
         self._update_progress("Downloading", 10, f"Downloading video from {url}...")
         video_path, audio_path, video_info = self.downloader.download(url)
 
-        self._update_progress("Analyzing", 30, "Transcribing and Analyzing Signals...")
+        self._update_progress("Analyzing", 30, "Starting multi-model signal analysis...")
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            transcription_future = executor.submit(self.transcriber.transcribe, audio_path)
-            audio_analysis_future = executor.submit(self.detector.audio_analyzer.analyze_audio, audio_path)
-            motion_analysis_future = executor.submit(self.detector.motion_detector.analyze_motion, video_path)
-
-            futures = {
-                "transcript": transcription_future,
-                "audio_data": audio_analysis_future,
-                "motion_data": motion_analysis_future
+            futures_map = {
+                executor.submit(self.transcriber.transcribe, audio_path): ("transcript", 35, "Transcription"),
+                executor.submit(self.detector.audio_analyzer.analyze_audio, audio_path): ("audio_data", 40, "Audio Signal Analysis"),
+                executor.submit(self.detector.motion_detector.analyze_motion, video_path): ("motion_data", 45, "Visual Motion Detection"),
             }
 
             if run_beat_detection:
-                futures["beat_data"] = executor.submit(self._detect_beats, audio_path)
+                futures_map[executor.submit(self._detect_beats, audio_path)] = ("beat_data", 48, "Rhythmic Beat Detection")
 
             results = {}
-            for name, future in futures.items():
+            for future in concurrent.futures.as_completed(futures_map):
+                name, percentage, msg = futures_map[future]
                 try:
                     results[name] = future.result()
+                    self._update_progress("Analyzing", percentage, f"Completed: {msg}")
                 except Exception as e:
                     print(f"Error in {name}: {e}")
                     results[name] = [] if name != "transcript" else None

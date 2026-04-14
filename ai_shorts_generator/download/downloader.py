@@ -15,30 +15,34 @@ class Downloader:
     def download(self, url):
         common_opts = {
             'js_runtimes': {'node': {}},
+            'remote_components': ['ejs:github'],
             'cache_dir': False,
             'noprogress': True,
             'no_color': True,
             'logger': DummyLogger(),
             'quiet': True,
             'no_warnings': True,
-            'http_headers': {
+            'headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Accept-Language': 'en-us,en;q=0.5',
                 'Sec-Fetch-Mode': 'navigate',
+                'Referer': 'https://www.google.com/',
             },
             'extractor_args': {
                 'youtube': {
                     'player_client': ['android', 'ios', 'web'],
+                    'player_skip': ['webpage', 'configs'],
                 }
             }
         }
 
         video_opts = {
             **common_opts,
-            'format': 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'format': 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][ext=mp4]/best',
             'outtmpl': os.path.join(self.download_dir, 'video.%(ext)s'),
             'merge_output_format': 'mp4',
+            'check_formats': False,
         }
 
         audio_opts = {
